@@ -1,9 +1,9 @@
 const { json } = require('express')
 const jwt=require('jsonwebtoken')
-
+require('dotenv').config()
 const UnauthorizeError = require('../errors/UnauthorizeError')
 class JWTAuthentication{
-    static key="RandomKey1234"
+
     constructor(id,username,isAdmin){
         this.id=id
         this.username=username
@@ -11,7 +11,7 @@ class JWTAuthentication{
     }
    static jwtUserAuthentication(id,username,isAdmin){
   const payload=new JWTAuthentication(id,username,isAdmin)    
-  const token=jwt.sign(JSON.stringify(payload),JWTAuthentication.key)
+  const token=jwt.sign(JSON.stringify(payload),process.env.AUTH_SECRET_KEY)
   
     return token
 
@@ -20,12 +20,12 @@ class JWTAuthentication{
 
    static verifyToken(token){
 
-    const payload=jwt.verify(token,JWTAuthentication.key)
+    const payload=jwt.verify(token,process.env.AUTH_SECRET_KEY)
    return payload
    }
    static isAdmin(req,res,next){
     
-      const token=req.cookies.auth
+      const token=req.cookies[process.env.AUTH_COOKIE_NAME]
     
     
        if(!token){
@@ -43,7 +43,7 @@ class JWTAuthentication{
      
 
     static isUser(req,res,next){
-        const token=req.cookies.auth
+        const token=req.cookies[process.env.AUTH_COOKIE_NAME]
     
     
        if(!token){

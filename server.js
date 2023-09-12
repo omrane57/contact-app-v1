@@ -52,7 +52,7 @@ const  userRouter=express.Router()
 application.use('/api/v1/contact-app',mainRouter)
 mainRouter.use('',gaurded)
 mainRouter.use('',ungaurded)
-gaurded.use('/admin',adminRouter)
+gaurded.use('/admin/user',adminRouter)
 gaurded.use('/user',userRouter)
 
 ungaurded.post('/login',login)
@@ -60,29 +60,30 @@ adminRouter.use(JWTAuthentication.isAdmin)
 userRouter.use(JWTAuthentication.isUser)
 
 
+const contactRouter = express.Router({mergeParams:true})
+const contactDetailsRouter=express.Router({mergeParams:true})
+userRouter.use('/:userId/contact',contactRouter)
+userRouter.post('/',createContact)
+userRouter.get('/',getAllContact)
+userRouter.get('/:contactId',getContact)
+userRouter.delete('/:contactId',deleteContact)
+contactRouter.use('/contactDetails',contactDetailsRouter)
 
+contactDetailsRouter.post('/',createContactDetails)
 
-userRouter.post('/:userId',createContact)
-userRouter.get('/:userId',getAllContact)
-userRouter.get('/:userId/contact/:contactId',getContact)
-userRouter.delete('/:userId/contact/:contactId',deleteContact)
+contactRouter.put('/:contactId',updateContact)
+contactDetailsRouter.get('',getAllContactDetails)
+contactDetailsRouter.get('/:contactDetailsId',getContactDetails)
 
-
-userRouter.post('/:userId/contact/:contactId',createContactDetails)
-
-userRouter.put('/:userId/contact/:contactId',updateContact)
-userRouter.get('/:userId/contact/:contactId/contactDetails',getAllContactDetails)
-userRouter.get('/:userId/contact/:contactId/contactDetails/:contactDetailsId',getContactDetails)
-
-userRouter.delete('/:userId/contact/:contactId/contactDetails/:contactDetailsId',deleteContactDetails)
-userRouter.put('/:userId/contact/:contactId/contactDetails/:contactDetailsId',updateContactDetails)
+contactDetailsRouter.delete('/:contactDetailsId',deleteContactDetails)
+contactDetailsRouter.put('/:contactDetailsId',updateContactDetails)
 adminRouter.post('/admin',createAdmin)
-adminRouter.post('/user',createUser)
+adminRouter.post('/',createUser)
 
-adminRouter.get('/getAllUser',getAllStudent)
-adminRouter.get('/getUser/:id',getStudent)
-adminRouter.delete('/delete/:id',del)
-adminRouter.put('/update/:id',update)
+adminRouter.get('/',getAllStudent)
+adminRouter.get('/:id',getStudent)
+adminRouter.delete('/:id',del)
+adminRouter.put('/:id',update)
 application.use(ErrorHandler)
 application.listen(9009,()=>{
     console.log("Server Started At Port No 3000");

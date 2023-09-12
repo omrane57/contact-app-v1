@@ -1,4 +1,5 @@
 const Contact = require("./Contact");
+const bcrypt = require('bcrypt');
 const  { NotFound,
   UnauthorizeError,
   ValidationError} = require( './errors/Index');
@@ -16,15 +17,17 @@ class User {
    this.userName=userName,
    this.password=password
   }
-  static newAdmin(firstName, lastName,userName,password) {
+  static async newAdmin(firstName, lastName,userName,password) {
     try{
       if (typeof firstName != "string") {
         throw new ValidationError("Invalid First Name");
       }
       if (typeof lastName != "string") {
         throw new ValidationError("Invalid Last Name");
-      } 
-      let newAdmin= new User(User.#userId++,firstName, lastName, true,userName,password);
+      }
+      let hashedPassword= bcrypt.hash(password,12)
+    
+      let newAdmin= new User(User.#userId++,firstName, lastName, true,userName,await hashedPassword);
       User.#allUsers.push(newAdmin)
       return newAdmin;
     }
@@ -35,7 +38,7 @@ class User {
 
     
   }
- static newUser(firstName, lastName,userName,password) {
+ static async newUser(firstName, lastName,userName,password) {
 
  try{
   // if (!this.isAdmin) {
@@ -47,7 +50,9 @@ class User {
   if (typeof lastName != "string") {
     return new ValidationError("Invalid Last Name");
   }
-  let newUser= new User(User.#userId++, firstName, lastName, false,userName,password);
+  let  hashedPassword= bcrypt.hash(password,12) 
+  
+  let newUser= new User(User.#userId++, firstName, lastName, false,userName,await hashedPassword);
    User.#allUsers.push(newUser)
   return newUser;
 
@@ -147,11 +152,11 @@ static updateUser(index,parameter,newValue){
     }
   
  }
- static authenticateUser(userName,password){
+ static async authenticateUser(userName,password){
 try{
    const user=User.getUserByUserName(userName)
-  
-   if(user.password!==password)
+  const result= bcrypt.compare(password,user.password )
+   if( !await result)
 {
   throw new UnauthorizeError("Incorrect Password")
 }

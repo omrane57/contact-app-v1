@@ -1,8 +1,10 @@
+require('dotenv').config()
 
 const User = require("../User");
 const {ValidationError,UnauthorizeError} = require("../errors/Index.js");
 const cookie=require('cookie-parser');
 const JWTAuthentication = require("../middleware/JWTAuthentication");
+const bcrypt = require('bcrypt');
 const getAllStudent=(req,res)=>{
      try{
 
@@ -28,17 +30,21 @@ const getStudent=(req,res)=>{
             next(error)
         }
 }
-const login=(req,res,next)=>{
+const login = async(req,res,next)=>{
     try{ 
        
     
         const {userName,password}=req.body
+       
+      
+      
+      
         if(typeof userName !="string"||typeof userName !="string"){
             throw new ValidationError("Invalid Parameter")
         }
         const token=User.authenticateUser(userName,password)
     
-        res.cookie("auth",token)
+        res.cookie(process.env.AUTH_COOKIE_NAME,await token)
         res.status(200).send("Login Done")
 
     
